@@ -9,9 +9,9 @@ from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from pydantic import BaseModel, EmailStr
 
-from .models import UserRegister, UserLogin, User, UserBase
+from models import UserRegister, UserLogin, User, UserBase
 
-from sqlmodel import create_engine, Session, SQLModel, select
+from sqlmodel import Session, select
 from sqlalchemy.exc import IntegrityError
 
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
@@ -20,10 +20,8 @@ from typing import List
 
 from dotenv import load_dotenv
 
-load_dotenv()
-password = os.getenv("password") # Find JWT password generator
+from ..database import get_db, create_db_and_tables
 
-DATABASE_URL = f"mysql+pymysql://root:{password}@127.0.0.1/USERDB"
 
 SECRET_KEY =os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
@@ -31,7 +29,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
 class Token(BaseModel):
     access_token: str
@@ -53,20 +51,10 @@ conf = ConnectionConfig(
 )
 fm = FastMail(conf)
 
-
-engine = create_engine(DATABASE_URL, echo=True)
-
-def create_db_and_tables():
-    SQLModel.metadata.create_all(engine)
-
 app = FastAPI()
 
 def get_password_hash(password):
     return pwd_context.hash(password)
-
-def get_db():
-    with Session(engine) as session:
-        yield session
 
 
 @app.on_event("startup")
