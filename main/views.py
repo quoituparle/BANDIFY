@@ -25,6 +25,10 @@ class user_input(BaseModel):
     input_topic: str
     input_essay: str
 
+class user_info(BaseModel):
+    user_email: str
+    api_key: str | None
+
 class requirements(BaseModel):
     score: float = Field(description="The overall score of the essay")
     TR_score : float = Field(description="The score of TR part")
@@ -34,7 +38,7 @@ class requirements(BaseModel):
     reason : str = Field(description="Point out the reasons for the score")
     improvement : str = Field(description="Point out directions for improvement.")
 
-@router.post('/api_storage/', status_code=200)
+@router.post('/storage/', status_code=200)
 async def api_storage(input_data: db_input, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     current_user.api_key = input_data.api_key
     current_user.language = input_data.user_language
@@ -73,7 +77,16 @@ async def handle_input(GEMINI_API_KEY: str, model: str, topic: str, essay: str, 
 
         if response.text:
             parsed_response = requirements.model_validate_json(response.text)
-            output = {f"Overall_score: {parsed_response.score}, TR: {parsed_response.TR_score}, LR: {parsed_response.LR_score}, CC: {parsed_response.CC_score}, GRA: {parsed_response.GRA_score}, reason: {parsed_response.reason}, improvement: {parsed_response.improvement}"}
+            output = {
+                "Overall_score": parsed_response.score,
+                "TR": parsed_response.TR_score,
+                "LR": parsed_response.LR_score,
+                "CC": parsed_response.CC_score,
+                "GRA": parsed_response.GRA_score,
+                "reason": parsed_response.reason,
+                "improvement": parsed_response.improvement
+                },
+        
             return output
         else:
             print(response)
@@ -95,3 +108,24 @@ async def handle_response(input_data: user_input, db: User = Depends(get_current
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No score generated")
     
     return output
+
+@router.get('/info/')
+async def get_user_info(current_user: User = Depends(get_current_user)):
+    """
+    Fetches the current user's email and saved API key.
+    """
+    if not current_user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication required")
+    
+    return user_info(user_email=current_user.email, api_key=current_user.email)
+
+@router.delete('/user/delete')
+async def delete_user_account(db: Session = Depends(get_db), current_user : User = Depends(get_current_user)):
+    db.delete(current_user)
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        print(f"Some error occured when deleting the user, detail: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to delete user")
+    return
