@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .auth.views import router as auth_router
-from .main.views import router as main_router
+from .auth import views as auth_views
+from .core import views as main_views
 
 app = FastAPI()
 
@@ -26,5 +26,5 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth_router)
-app.include_router(main_router)
+app.include_router(auth_views.router)
+app.include_router(main_views.router)
