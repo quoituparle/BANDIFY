@@ -63,7 +63,7 @@ async def handle_input(GEMINI_API_KEY: str, model: str, topic: str, essay: str, 
         response_mime_type="application/json",
         response_schema=requirements,
         system_instruction=f"""You are an IELTS examiner. I will submit my essay, and you will give it a score and briefly point out any issues.You should use {language} to respond"""
-        ),
+        )
 
         input = f"""Topic: {topic}. Essay: {essay}"""
 
@@ -83,7 +83,7 @@ async def handle_input(GEMINI_API_KEY: str, model: str, topic: str, essay: str, 
                 "GRA": parsed_response.GRA_score,
                 "reason": parsed_response.reason,
                 "improvement": parsed_response.improvement
-                },
+                }
         
             return output
         else:
@@ -94,14 +94,20 @@ async def handle_input(GEMINI_API_KEY: str, model: str, topic: str, essay: str, 
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal error occured")
 
 @router.post('/response/')
-async def handle_response(input_data: user_input, db: User = Depends(get_current_user)):
-    api_key = db.api_key
-    language = db.language
+async def handle_response(input_data: user_input, current_user: User = Depends(get_current_user)):
+    api_key = current_user.api_key
+    language = current_user.language
     model = input_data.model
     topic = input_data.input_topic
     essay = input_data.input_essay
 
-    output = await handle_input(api_key=api_key, language=language, model=model, topic=topic, essay=essay)
+    print(f"API: {api_key}")
+    print(f"Language: {language}")
+
+    if not current_user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication required")    
+
+    output = await handle_input(GEMINI_API_KEY=api_key, model=model, topic=topic, essay=essay, language=language)
     if not output:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No score generated")
     
@@ -115,7 +121,7 @@ async def get_user_info(current_user: User = Depends(get_current_user)):
     if not current_user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication required")
 
-    return user_info(user_email=current_user.email, api_key=current_user.email, language=current_user.language)
+    return user_info(user_email=current_user.email, api_key=current_user.api_key, language=current_user.language)
 
 @router.delete('/user/delete')
 async def delete_user_account(db: Session = Depends(get_db), current_user : User = Depends(get_current_user)):
