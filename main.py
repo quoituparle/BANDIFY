@@ -1,11 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqladmin import Admin
 
 from .auth import views as auth_views
 from .core import views as main_views
 from .admin import admin as admin_app
+from .database import engine
 
 app = FastAPI()
+
+admin = Admin(app, engine)
 
 origins = [
     "http://localhost:5173",

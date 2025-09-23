@@ -23,5 +23,6 @@ def make_admin(db: Session, email: str):
     except Exception as e:
         db.rollback()
         print(f"Unable to update admin user, {e}")
+db_session = next(get_db()) # next() function is vital because the get_db() use yield, next() can activate yield to continue passing.
 
-make_admin(db=get_db, email=os.getenv('admin_email'))
+make_admin(db_session, email=os.getenv('admin_email'))
