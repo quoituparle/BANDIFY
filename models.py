@@ -31,13 +31,15 @@ class User(UserBase, table=True):
     code_expires_at: datetime.datetime | None = Field(default=None)
     api_key: str | None = Field(default=None)
     language: str
+    
 
 class Essay(SQLModel, table=True):
     essay_id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(foreign_key="user.id")
     published_date: datetime.datetime = Field(default_factory=datetime.timezone.utc)
     content: str
     score: str
-    topic_id: uuid.UUID = Field(foreign_key="topic.topic_id")   #Use topic instead of Topic, handle database.
+    topic_id: uuid.UUID = Field(foreign_key="topic.topic_id")   
     topic: "Topic" = Relationship(back_populates="essays")
 
 
