@@ -121,7 +121,7 @@ async def get_user_info(current_user: User = Depends(get_current_user)):
 
     return user_info(user_email=current_user.email, api_key=current_user.api_key, language=current_user.language)
 
-@router.delete('/user/delete')
+@router.delete('/user/delete/')
 async def delete_user_account(db: Session = Depends(get_db), current_user : User = Depends(get_current_user)):
     db.delete(current_user)
     try:
@@ -132,5 +132,11 @@ async def delete_user_account(db: Session = Depends(get_db), current_user : User
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to delete user")
     return
 
-@router.post('/topic')
+@router.get('/topics/', status_code=200)
+# User can see all the published topics
 async def get_topic_data(db: Session = Depends(get_db)):
+    topics = db.exec(Topic).all()
+    if not topics:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No topics in playground")
+    return topics
+
