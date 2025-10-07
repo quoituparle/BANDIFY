@@ -1,3 +1,5 @@
+import uuid
+import datetime
 from fastapi import  status, HTTPException, APIRouter, Depends
 from sqlmodel import Session
 
@@ -140,3 +142,32 @@ async def get_topic_data(db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No topics in playground")
     return topics
 
+def rank_essay_score(score: str, date: str, name: str):
+    ranked_data = sorted(score, reverse=True)
+    results = []
+    for i, val in enumerate(ranked_data, start=1):
+        data = {
+            "rank": i,
+            "score": val,
+            "published_date": date,
+            "name": name,
+        },
+        results.append(data)
+    return results
+
+def essay_time(score: str, date: str, name: str):
+    time_data = sorted(date, reverse=True)
+    results = []
+    for i in time_data:
+        data = {
+            "score": score,
+            "published_date": date,
+            "name": name,
+        }
+        results.append(data)
+    return results
+
+@router.get('/topic/{topic_id}/essays', status_code=200)
+# This API shows detail of the topic and include essays of other users. Also include ranking function.
+async def get_essay_data(topic_id: uuid.UUID, db: Session = Depends(get_db)):
+    topic = db.get(Topic, topic_id)
