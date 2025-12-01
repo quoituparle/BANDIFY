@@ -1,15 +1,16 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqladmin import Admin
-from sqlmodel import Session
+from starlette.middleware.sessions import SessionMiddleware
+
+from starlette_admin.contrib.sqlmodel import Admin, ModelView
 
 from .auth import views as auth_views
 from .core import views as main_views
 from .admin import admin as admin_app
-from .admin.admin import authentication_backend, make_admin 
-from .models import UserAdmin, TopicAdmin
-from .database import engine, get_db, create_db_and_tables 
-import os
+from .models import User, Essay, Topic
+from .database import engine
+from .admin.admin import AdminAuthProvider
+
 
 app = FastAPI()
 
@@ -33,26 +34,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(admin_app.router)
 app.include_router(auth_views.router)
 app.include_router(main_views.router)
 
-admin = Admin(templates_dir="my_templates", app=app, engine=engine, authentication_backend=authentication_backend)
-# change view function in sqladmin have conflict, cannot change the existing page
-admin.add_view(UserAdmin)
-admin.add_view(TopicAdmin)
 
-@app.on_event("startup")
-def on_startup():
-    # 1. 先建表
-    create_db_and_tables()
-    
-    print("Checking admin user...")
-    db_gen = get_db()
-    db = next(db_gen) 
-    try:
-        make_admin(db, email=os.getenv('admin_email'))
-    except Exception as e:
-        print(f"Error setting up admin: {e}")
-    finally:
-        db.close()
+####    For admin page  ####
+# Create an empty admin interface
+admin = Admin(engine, title="Tutorials: Basic", auth_provider=AdminAuthProvider())
+app.add_middleware(SessionMiddleware, secret_key='jlkasdbjfgb234352')
+
+
+# Add view
+admin.add_view(ModelView(User, icon="fas fa-list"))
+admin.add_view(ModelView(Topic, icon="fas fa-list"))
+admin.add_view(ModelView(Essay, icon="fas fa-list"))
+
+
+# Mount admin to your app
+admin.mount_to(app)

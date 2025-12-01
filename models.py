@@ -4,7 +4,6 @@ import uuid
 from typing import List
 from pydantic import EmailStr
 from sqlmodel import Field, SQLModel, Relationship
-from sqladmin import ModelView, expose, BaseView
 from starlette.requests import Request
 
 
@@ -38,12 +37,18 @@ class Essay(SQLModel, table=True):
     user_id: uuid.UUID = Field(foreign_key="user.id")
     author: "User" = Relationship(back_populates="essays")
     published_date: datetime.datetime = Field(default_factory=lambda: datetime.datetime.now(datetime.timezone.utc))
-    content: str
-    score: str
+
+    Overall_score: float
+    TR:float
+    LR:float
+    CC:float
+    GRA:float
+    reason:str
+    improvement:str
+    content:str
+    
     topic_id: uuid.UUID = Field(foreign_key="topic.topic_id")   
     topic: "Topic" = Relationship(back_populates="essays")
-
-
 
 class Topic(SQLModel, table=True):
     topic_id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
@@ -51,23 +56,5 @@ class Topic(SQLModel, table=True):
     essays: List["Essay"] = Relationship(back_populates="topic")
 
 
-class UserAdmin( ModelView, model=User):
-    column_list = [User.id, User.full_name, User.email]
-    can_create = True
-    can_edit = True
-    can_delete = True
-    name = "User"
-    name_plural = "Users"
-    icon = "fa-solid fa-user"
-    identity = "user"
 
-    def is_accessible(self, request: Request) -> bool:
-        return request.session.get("is_superuser", False) 
-
-class TopicAdmin(ModelView, model=Topic):
-    column_list = [Topic.topic, Topic.topic_id]
-    form_columns = [Topic.topic]
-    
-    def is_accessible(self, request: Request) -> bool:
-        return request.session.get("is_superuser", False) 
 
