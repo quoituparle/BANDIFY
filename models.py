@@ -4,6 +4,7 @@ import uuid
 from typing import List
 from pydantic import EmailStr
 from sqlmodel import Field, SQLModel, Relationship
+from sqlalchemy import Column, Text
 
 
 class UserBase(SQLModel):
@@ -42,9 +43,9 @@ class Essay(SQLModel, table=True):
     LR:float
     CC:float
     GRA:float
-    reason:str
-    improvement:str
-    content:str
+    reason:str = Field(sa_column=Column(Text)) # The default str limits is VARCHAR(255), must use TEXT
+    improvement:str = Field(sa_column=Column(Text)) 
+    content:str = Field(sa_column=Column(Text)) 
     
     topic_id: uuid.UUID = Field(foreign_key="topic.topic_id")   
     topic: "Topic" = Relationship(back_populates="essays")

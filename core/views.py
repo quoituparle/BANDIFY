@@ -153,7 +153,7 @@ async def get_essay_data(topic_id: uuid.UUID, db: Session = Depends(get_db)):
     
     essays = topic.essays
 
-    essays_ranked_by_score = sorted(essays, key=lambda e: float(e.score), reverse=True)
+    essays_ranked_by_score = sorted(essays, key=lambda e: float(e.Overall_score), reverse=True)
     essays_ranked_by_time = sorted(essays, key=lambda e: e.published_date, reverse=True)
 
     return {

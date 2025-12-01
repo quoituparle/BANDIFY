@@ -55,9 +55,5 @@ admin.mount_to(app)
 
 @app.on_event("startup")
 def on_startup():
-    # 1. 先建表
     create_db_and_tables()
-    
-    print("Checking admin user...")
-    db_gen = get_db()
-    db = next(db_gen) 
+
