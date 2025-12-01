@@ -163,8 +163,14 @@ async def get_essay_data(topic_id: uuid.UUID, db: Session = Depends(get_db)):
     }
 
 class essay_create(BaseModel):
+    Overall_score: float
+    TR: float
+    LR: float
+    CC: float
+    GRA: float
+    reason: str
+    improvement: str
     content: str
-    score: str | None
     
 
 @router.post('/topic/{topic_id}/essays', status_code=201)
@@ -180,8 +186,13 @@ async def create_essay(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cannot find topic, please try again")
     
     new_essay = Essay(
-        content=essay_data.content,
-        score=essay_data.score,
+        Overall_score=essay_data.Overall_score,
+        TR=essay_data.TR,
+        LR=essay_data.LR,
+        CC=essay_data.CC,
+        GRA=essay_data.GRA,
+        reason=essay_data.reason,
+        improvement=essay_data.improvement,
         user_id=current_user.id,
         topic_id=topic_id
     )
