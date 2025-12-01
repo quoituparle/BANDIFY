@@ -4,7 +4,6 @@ import uuid
 from typing import List
 from pydantic import EmailStr
 from sqlmodel import Field, SQLModel, Relationship
-from starlette.requests import Request
 
 
 class UserBase(SQLModel):

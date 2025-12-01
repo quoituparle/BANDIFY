@@ -8,7 +8,7 @@ from .auth import views as auth_views
 from .core import views as main_views
 from .admin import admin as admin_app
 from .models import User, Essay, Topic
-from .database import engine
+from .database import engine, get_db, create_db_and_tables
 from .admin.admin import AdminAuthProvider
 
 
@@ -52,3 +52,12 @@ admin.add_view(ModelView(Essay, icon="fas fa-list"))
 
 # Mount admin to your app
 admin.mount_to(app)
+
+@app.on_event("startup")
+def on_startup():
+    # 1. 先建表
+    create_db_and_tables()
+    
+    print("Checking admin user...")
+    db_gen = get_db()
+    db = next(db_gen) 

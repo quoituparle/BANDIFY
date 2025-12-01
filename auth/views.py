@@ -19,7 +19,7 @@ from typing import List
 
 from dotenv import load_dotenv
 
-from ..database import get_db, create_db_and_tables
+from ..database import get_db
 
 load_dotenv()
 
