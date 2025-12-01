@@ -61,7 +61,7 @@ def get_password_hash(password):
 
 class UserRead(UserBase):
     id: uuid.UUID
-    full_name: str | None = None 
+    username: str | None = None 
 
 def generate_verification_code(length: int=6):
     return "".join(random.choices(string.digits, k=length))
@@ -78,7 +78,7 @@ async def Registration(user_data: UserRegister, db: Session = Depends(get_db)):
     db_user = User(        
     email = user_data.email,
     hashed_password = get_password_hash(user_data.password),
-    full_name = user_data.full_name,
+    username = user_data.username,
     )
     db.add(db_user)
 
