@@ -150,11 +150,32 @@ async def get_essay_data(topic_id: uuid.UUID, db: Session = Depends(get_db)):
     topic = db.get(Topic, topic_id)
     if not topic:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cannot find topic, please try again")
-    
-    essays = topic.essays
 
-    essays_ranked_by_score = sorted(essays, key=lambda e: float(e.Overall_score), reverse=True)
-    essays_ranked_by_time = sorted(essays, key=lambda e: e.published_date, reverse=True)
+    raw_essays = topic.essays
+    
+    def format_essay_with_author(essay: Essay):
+        return {
+            "essay_id": essay.essay_id,
+            "user_id": essay.user_id,
+            "content": essay.content,
+            "published_date": essay.published_date,
+            "Overall_score": essay.Overall_score,
+            "TR": essay.TR,
+            "LR": essay.LR,
+            "CC": essay.CC,
+            "GRA": essay.GRA,
+            "reason": essay.reason,
+            "improvement": essay.improvement,
+            "author": {
+                "username": essay.author.username if essay.author else "Anonymous User",
+                "email": essay.author.email if essay.author else ""
+            }
+        }
+
+    formatted_essays = [format_essay_with_author(e) for e in raw_essays]
+
+    essays_ranked_by_score = sorted(formatted_essays, key=lambda e: float(e['Overall_score']), reverse=True)
+    essays_ranked_by_time = sorted(formatted_essays, key=lambda e: e['published_date'], reverse=True)
 
     return {
         "topic": topic,

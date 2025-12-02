@@ -45,7 +45,7 @@ app.add_middleware(SessionMiddleware, secret_key='jlkasdbjfgb234352')
 
 
 # Add view
-admin.add_view(ModelView(User, icon="fas fa-list"))
+admin.add_view(ModelView(User, icon="fas fa-user"))
 admin.add_view(ModelView(Topic, icon="fas fa-list"))
 admin.add_view(ModelView(Essay, icon="fas fa-list"))
 
