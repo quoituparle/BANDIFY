@@ -1,5 +1,6 @@
 import uuid
-import datetime
+import os
+from dotenv import load_dotenv
 from fastapi import  status, HTTPException, APIRouter, Depends
 from sqlmodel import Session, select
 
@@ -12,8 +13,11 @@ from ..database import get_db
 from ..auth.views import get_current_user
 from ..models import User, Topic, Essay
 
+load_dotenv()
 
 router = APIRouter(prefix="/main", tags=["Main App"])
+
+default_api = os.getenv("api_key")
 
 class db_input(BaseModel):
     api_key: str
@@ -96,9 +100,13 @@ async def handle_input(GEMINI_API_KEY: str, model: str, topic: str, essay: str, 
         print(e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal error occured")
 
+print(f"THE DEFAULT API IS {default_api}")
 @router.post('/response/')
 async def handle_response(input_data: user_input, current_user: User = Depends(get_current_user)):
-    api_key = current_user.api_key
+    if not current_user.api_key:
+        api_key = default_api
+    else:
+        api_key = current_user.api_key
     language = current_user.language
     model = input_data.model
     topic = input_data.input_topic

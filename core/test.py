@@ -8,6 +8,10 @@ from pydantic import BaseModel, Field
 load_dotenv()
 
 GEMINI_API_KEY = os.getenv("api_key")
+if not GEMINI_API_KEY:
+    print("NO KEY")
+else:
+    print(GEMINI_API_KEY)
 
 
 client = genai.Client(api_key=GEMINI_API_KEY)
