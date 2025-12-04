@@ -10,18 +10,4 @@ This repository contains the server-side logic for the [Project Name] applicatio
 - **Language:** Python 3.9+
 - **Authentication:** JWT (JSON Web Tokens)
 - **Admin Interface:** Starlette Admin
-- **Database:** PostgreSQL / SQLite (depending on your setup)
-
-## Project Structure
-
-```text
-.
-├── app
-│   ├── api          # Route controllers
-│   ├── core         # Config, security, and auth logic
-│   ├── models       # Database models
-│   ├── services     # Business logic (AI grading implementation)
-│   └── main.py      # Application entry point
-├── tests            # Unit and integration tests
-├── requirements.txt
-└── .env.example
+- **Database:** MySQL / SQLite (depending on your setup)
